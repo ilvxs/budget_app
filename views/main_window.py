@@ -3,37 +3,39 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QLineEdit, QComboBox, QPushButton,
     QTableWidget, QTableWidgetItem,
-    QLabel, QDateEdit, QMessageBox
+    QLabel, QDateEdit, QMessageBox,
+    QHeaderView, QGraphicsDropShadowEffect
 )
-from PySide6.QtCore import QDate
+from PySide6.QtCore import QDate, Qt
+from PySide6.QtGui import QColor, QIcon
 
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
-        # Improve UI design: ajoute du style
-        self.setStyleSheet("""
-            QWidget {
-                font-size: 14px;
-            }
-            QPushButton {
-                color: white;
-                padding: 8px;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            QLineEdit, QComboBox {
-                padding: 5px;
-            }
-        """)
 
         #  Fenêtre
         self.setWindowTitle("Gestion de Budget")
-        self.resize(900, 700)
-
+        self.resize(1200, 750)
         #  Layout principal
         self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(20, 20, 20, 20)
+        self.layout.setSpacing(15)
         self.setLayout(self.layout)
+
+        title = QLabel("💰 Gestionnaire de Budget Intelligent")
+
+        title.setStyleSheet("""
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 10px;
+            """)
+
+        self.layout.addWidget(title)
+
+        # Icone de l'application
+        self.setWindowIcon(QIcon("assets/icon.png"))
 
         #  1. Inputs
         input_layout = QHBoxLayout()
@@ -59,8 +61,9 @@ class MainWindow(QWidget):
         self.date_input.setCalendarPopup(True)
 
         # --- Bouton AJOUTER (Vert standard) ---
-        self.add_button = QPushButton("Ajouter")
+        self.add_button = QPushButton("➕ Ajouter")
         self.add_button.setStyleSheet("background-color: #4CAF50;")
+        self.add_button.setCursor(Qt.PointingHandCursor)
 
         input_layout.addWidget(self.montant_input)
         input_layout.addWidget(self.type_input)
@@ -92,8 +95,9 @@ class MainWindow(QWidget):
         self.category_filter.addItems(
             ["Food", "Transport", "Logement", "Factures", "Salaire", "Freelance", "Autre"])
 
-        self.filter_button = QPushButton("Filtrer")
+        self.filter_button = QPushButton("🔍 Filtrer")
         self.filter_button.setStyleSheet("background-color: #b104e5;")
+        self.filter_button.setCursor(Qt.PointingHandCursor)
 
         filter_layout.addWidget(self.month_filter)
         filter_layout.addWidget(self.year_filter)
@@ -104,6 +108,8 @@ class MainWindow(QWidget):
 
         #  3. Tableau
         self.table = QTableWidget()
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.Stretch)
         self.table.setColumnCount(7)
         self.table.setHorizontalHeaderLabels([
             "N°", "ID", "Type", "Montant", "Catégorie", "Description", "Date"
@@ -111,47 +117,164 @@ class MainWindow(QWidget):
 
         self.layout.addWidget(self.table)
 
+        self.table.verticalHeader().setDefaultSectionSize(40)
+
         #  4. Totaux
         self.total_revenus_label = QLabel("Total revenus: 0")
         self.total_depenses_label = QLabel("Total dépenses: 0")
         self.solde_label = QLabel("Solde: 0")
 
-        self.layout.addWidget(self.total_revenus_label)
-        self.layout.addWidget(self.total_depenses_label)
-        self.layout.addWidget(self.solde_label)
+        totals_layout = QHBoxLayout()
+
+        self.total_revenus_label.setStyleSheet("""
+        background-color: #dcfce7;
+        padding: 15px;
+        border-radius: 10px;
+        color: #166534;
+        """)
+
+        self.total_depenses_label.setStyleSheet("""
+        background-color: #fee2e2;
+        padding: 15px;
+        border-radius: 10px;
+        color: #991b1b;
+        """)
+
+        self.solde_label.setStyleSheet("""
+        background-color: #dbeafe;
+        padding: 15px;
+        border-radius: 10px;
+        color: #1e40af;
+        """)
+
+        totals_layout.addWidget(self.total_revenus_label)
+        totals_layout.addWidget(self.total_depenses_label)
+        totals_layout.addWidget(self.solde_label)
+
+        self.layout.addLayout(totals_layout)
 
         #  5. Bouton SUPPRIMER (Rouge)
-        self.delete_button = QPushButton("Supprimer")
+        self.delete_button = QPushButton("🗑️ Supprimer")
         self.delete_button.setStyleSheet("background-color: #f44336;")
+        self.delete_button.setCursor(Qt.PointingHandCursor)
         self.layout.addWidget(self.delete_button)
 
         #  6. Bouton GRAPHIQUE (Bleu)
-        self.chart_button = QPushButton("Afficher graphique")
+        self.chart_button = QPushButton("📊 Afficher graphique")
         self.chart_button.setStyleSheet("background-color: #2196F3;")
+        self.chart_button.setCursor(Qt.PointingHandCursor)
         self.layout.addWidget(self.chart_button)
 
         #  7. Bouton EXPORT Excel
-        self.export_button = QPushButton("Exporter Excel")
+        self.export_button = QPushButton("💾 Exporter Excel")
         self.export_button.setStyleSheet("background-color: #1B5E20;")
+        self.export_button.setCursor(Qt.PointingHandCursor)
         self.layout.addWidget(self.export_button)
 
         self.update_categories()
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #f5f7fa;
+                font-family: Segoe UI;
+                font-size: 14px;
+            }
 
-    def confirm_delete(self):
-        msg = QMessageBox()
+            QLineEdit, QComboBox, QDateEdit {
+                padding: 8px;
+                min-height: 20px;
+                border: 1px solid #d1d5db;
+                border-radius: 8px;
+                background-color: white;
+                color: #111827;
+            }
 
-        msg.setWindowTitle("Confirmation")
-        msg.setText("Voulez-vous vraiment supprimer cette transaction ?")
+            QPushButton {
+                background-color: #2563eb;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 10px;
+                font-weight: bold;
+            }
 
-        msg.setIcon(QMessageBox.Warning)
+            QPushButton:hover {
+                background-color: #1d4ed8;
+            }
 
-        msg.setStandardButtons(
-            QMessageBox.Yes | QMessageBox.No
-        )
+            QTableWidget {
+                background-color: white;
+                border-radius: 10px;
+                gridline-color: #e5e7eb;
+                color: #111827;
+                selection-background-color: #2563eb;
+                selection-color: white;
+            }
 
-        msg.setDefaultButton(QMessageBox.No)
+            QHeaderView::section {
+                background-color: #2563eb;
+                color: white;
+                padding: 8px;
+                border: none;
+                font-weight: bold;
+            }
 
-        return msg.exec()
+            QComboBox QAbstractItemView {
+                background-color: white;
+                color: #111827;
+                selection-background-color: #2563eb;
+                selection-color: white;
+                border-radius: 8px;
+                padding: 5px;
+            }
+            QLabel {
+                color: #374151;
+                font-weight: bold;
+            }
+            QCalendarWidget QWidget {
+                background-color: white;
+                color: #111827;
+            }
+
+            QCalendarWidget QToolButton {
+                background-color: #eb2563;
+                color: #111827;
+                border: none;
+                padding: 5px;
+                padding-left: 10px;
+                padding-right: 10px;
+                border-radius: 2px;
+            }
+
+            QCalendarWidget QMenu {
+                background-color: white;
+                color: #111827;
+            }
+
+            QCalendarWidget QSpinBox {
+                background-color: white;
+                color: #111827;
+                border: 1px solid #d1d5db;
+                border-radius: 5px;
+                padding: 2px;
+            }
+
+            QCalendarWidget QAbstractItemView {
+                selection-background-color: #2563eb;
+                selection-color: white;
+                background-color: white;
+                color: #111827;
+            }
+            """)
+
+        self.add_shadow(self.table)
+
+        self.add_shadow(self.add_button)
+        self.add_shadow(self.filter_button)
+        self.add_shadow(self.delete_button)
+
+        self.add_shadow(self.total_revenus_label)
+        self.add_shadow(self.total_depenses_label)
+        self.add_shadow(self.solde_label)
 
     def update_categories(self):
         type_ = self.type_input.currentText()
@@ -201,3 +324,30 @@ class MainWindow(QWidget):
         self.montant_input.clear()
         self.description_input.clear()
         self.date_input.setDate(QDate.currentDate())
+
+    def add_shadow(self, widget):
+        shadow = QGraphicsDropShadowEffect()
+
+        shadow.setBlurRadius(20)
+        shadow.setXOffset(0)
+        shadow.setYOffset(4)
+
+        shadow.setColor(QColor(0, 0, 0, 60))
+
+        widget.setGraphicsEffect(shadow)
+
+    def confirm_delete(self):
+        msg = QMessageBox()
+
+        msg.setWindowTitle("Confirmation")
+        msg.setText("Voulez-vous vraiment supprimer cette transaction ?")
+
+        msg.setIcon(QMessageBox.Warning)
+
+        msg.setStandardButtons(
+            QMessageBox.Yes | QMessageBox.No
+        )
+
+        msg.setDefaultButton(QMessageBox.No)
+
+        return msg.exec()
