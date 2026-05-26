@@ -137,6 +137,22 @@ class MainWindow(QWidget):
 
         self.update_categories()
 
+    def confirm_delete(self):
+        msg = QMessageBox()
+
+        msg.setWindowTitle("Confirmation")
+        msg.setText("Voulez-vous vraiment supprimer cette transaction ?")
+
+        msg.setIcon(QMessageBox.Warning)
+
+        msg.setStandardButtons(
+            QMessageBox.Yes | QMessageBox.No
+        )
+
+        msg.setDefaultButton(QMessageBox.No)
+
+        return msg.exec()
+
     def update_categories(self):
         type_ = self.type_input.currentText()
 

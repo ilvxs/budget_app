@@ -1,6 +1,7 @@
 from models import database
 import matplotlib.pyplot as plt
 from openpyxl import Workbook
+from PySide6.QtWidgets import QMessageBox
 
 
 class BudgetController:
@@ -66,14 +67,25 @@ class BudgetController:
         selected = self.view.table.currentRow()
 
         if selected == -1:
+            self.view.show_message("Sélectionnez une transaction")
             return
 
-        # la colonne 1 contient l'id de la transaction
+        # colonne 1 = vrai ID
         id_item = self.view.table.item(selected, 1)
+
+        if id_item is None:
+            return
+
         id_ = int(id_item.text())
 
-        database.delete_transaction(id_)
-        self.charger_transactions()
+        confirmation = self.view.confirm_delete()
+
+        if confirmation == QMessageBox.Yes:
+            database.delete_transaction(id_)
+
+            self.charger_transactions()
+
+            self.view.show_message("Transaction supprimée ✅")
 
     def filtrer_transactions(self):
         month = self.view.month_filter.currentText()
