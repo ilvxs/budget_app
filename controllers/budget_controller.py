@@ -5,9 +5,10 @@ from PySide6.QtWidgets import QMessageBox
 
 
 class BudgetController:
-    def __init__(self, view, user):
+    def __init__(self, view, user, main_window):
         self.view = view
         self.user = user
+        self.main_window = main_window
 
         # connecter les boutons
         self.view.add_button.clicked.connect(self.ajouter_transaction)
@@ -15,7 +16,7 @@ class BudgetController:
         self.view.filter_button.clicked.connect(self.filtrer_transactions)
         self.view.chart_button.clicked.connect(self.show_chart)
         self.view.export_button.clicked.connect(self.export_excel)
-        self.view.logout_button.clicked.connect(self.logout)
+        self.main_window.logout_button.clicked.connect(self.logout)
 
         # charger données au démarrage
         self.charger_transactions()
@@ -181,4 +182,4 @@ class BudgetController:
             self.login_window.show()
 
             # close dashboard
-            self.view.close()
+            self.main_window.close()

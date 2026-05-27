@@ -33,8 +33,9 @@ class LoginController:
 
             # connect controller
             self.controller = BudgetController(
-                self.main_window,
-                user
+                self.main_window.transactions_page,
+                user,
+                self.main_window
             )
 
             self.main_window.show()
