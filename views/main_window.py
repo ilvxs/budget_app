@@ -171,6 +171,11 @@ class MainWindow(QWidget):
         self.export_button.setCursor(Qt.PointingHandCursor)
         self.layout.addWidget(self.export_button)
 
+        self.logout_button = QPushButton("🚪 Logout")
+        self.logout_button.setStyleSheet("background-color: #9e9e9e;")
+        self.logout_button.setCursor(Qt.PointingHandCursor)
+        self.layout.addWidget(self.logout_button)
+
         self.update_categories()
         self.setStyleSheet("""
             QWidget {
@@ -271,7 +276,7 @@ class MainWindow(QWidget):
         self.add_shadow(self.add_button)
         self.add_shadow(self.filter_button)
         self.add_shadow(self.delete_button)
-
+        self.add_shadow(self.logout_button)
         self.add_shadow(self.total_revenus_label)
         self.add_shadow(self.total_depenses_label)
         self.add_shadow(self.solde_label)

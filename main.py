@@ -1,13 +1,19 @@
 import sys
+
 from PySide6.QtWidgets import QApplication
-from views.main_window import MainWindow
-from controllers.budget_controller import BudgetController
+
+from views.login_window import LoginWindow
+from controllers.login_controller import LoginController
+
 
 app = QApplication(sys.argv)
 
-window = MainWindow()
-controller = BudgetController(window)
+# login window
+login_window = LoginWindow()
 
-window.show()
+# controller
+controller = LoginController(login_window)
+
+login_window.show()
 
 sys.exit(app.exec())

@@ -5,8 +5,9 @@ from PySide6.QtWidgets import QMessageBox
 
 
 class BudgetController:
-    def __init__(self, view):
+    def __init__(self, view, user):
         self.view = view
+        self.user = user
 
         # connecter les boutons
         self.view.add_button.clicked.connect(self.ajouter_transaction)
@@ -14,6 +15,7 @@ class BudgetController:
         self.view.filter_button.clicked.connect(self.filtrer_transactions)
         self.view.chart_button.clicked.connect(self.show_chart)
         self.view.export_button.clicked.connect(self.export_excel)
+        self.view.logout_button.clicked.connect(self.logout)
 
         # charger données au démarrage
         self.charger_transactions()
@@ -24,7 +26,12 @@ class BudgetController:
         year = self.view.year_filter.currentText()
         categorie = self.view.category_filter.currentText()
 
-        revenus, depenses = database.get_totaux(month, year, categorie)
+        revenus, depenses = database.get_totaux(
+            self.user["id"],
+            month,
+            year,
+            categorie
+        )
         self.view.update_totaux(revenus, depenses)
 
     def ajouter_transaction(self):
@@ -50,7 +57,8 @@ class BudgetController:
             montant,
             categorie,
             description,
-            date
+            date,
+            self.user["id"]
         )
 
         # vider les champs + message et recharger les données
@@ -92,7 +100,8 @@ class BudgetController:
         year = self.view.year_filter.currentText()
         categorie = self.view.category_filter.currentText()
 
-        data = database.get_transactions_filtered(month, year, categorie)
+        data = database.get_transactions_filtered(
+            self.user["id"], month, year, categorie)
         self.view.update_table(data)
 
         self.mettre_a_jour_totaux()
@@ -104,6 +113,7 @@ class BudgetController:
         categorie = self.view.category_filter.currentText()
 
         revenus, depenses = database.get_totaux(
+            self.user["id"],
             month,
             year,
             categorie
@@ -131,7 +141,9 @@ class BudgetController:
 
     # exporter les données vers Excel
     def export_excel(self):
-        data = database.get_all_transactions()
+        data = database.get_all_transactions(
+            self.user["id"]
+        )
 
         wb = Workbook()
         ws = wb.active
@@ -144,3 +156,29 @@ class BudgetController:
         wb.save("transactions.xlsx")
 
         self.view.show_message("Export Excel réussi ✅")
+
+    def logout(self):
+        reply = QMessageBox.question(
+            self.view,
+            "Logout",
+            "Voulez-vous vous déconnecter ?",
+            QMessageBox.Yes | QMessageBox.No
+        )
+
+        if reply == QMessageBox.Yes:
+
+            # local imports to avoid circular import
+            from views.login_window import LoginWindow
+            from controllers.login_controller import LoginController
+
+            # open login
+            self.login_window = LoginWindow()
+
+            self.login_controller = LoginController(
+                self.login_window
+            )
+
+            self.login_window.show()
+
+            # close dashboard
+            self.view.close()

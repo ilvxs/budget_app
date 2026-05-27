@@ -15,28 +15,32 @@ def get_connection():
     )
 
 
-def get_all_transactions():
+def get_all_transactions(user_id):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM transactions")
+    cursor.execute("SELECT * FROM transactions WHERE user_id = %s", (user_id,))
     data = cursor.fetchall()
 
+    cursor.close()
     conn.close()
     return data
 
 
-def insert_transaction(type, montant, categorie, description, date):
+def insert_transaction(type_, montant, categorie, description, date, user_id):
     conn = get_connection()
     cursor = conn.cursor()
 
     query = """
-    INSERT INTO transactions (type, montant, categorie, description, date)
-    VALUES (%s, %s, %s, %s, %s)
+    INSERT INTO transactions (type, montant, categorie, description, date, user_id)
+    VALUES (%s, %s, %s, %s, %s, %s)
     """
 
-    cursor.execute(query, (type, montant, categorie, description, date))
+    cursor.execute(query, (type_, montant, categorie,
+                   description, date, user_id))
     conn.commit()
+
+    cursor.close()
     conn.close()
 
 
@@ -51,16 +55,21 @@ def delete_transaction(id):
 
 # Filtre par catégorie, mois et année
 
-def get_transactions_filtered(month, year, categorie):
+def get_transactions_filtered(user_id, month, year, categorie):
     conn = get_connection()
     cursor = conn.cursor()
 
-    query = "SELECT * FROM transactions WHERE 1=1"
-    params = []
+    query = """
+    SELECT * FROM transactions
+    WHERE user_id = %s
+    """
+
+    params = [user_id]
 
     if month != "Tous":
         query += " AND MONTH(date) = %s"
         params.append(month)
+
     if year != "Tous":
         query += " AND YEAR(date) = %s"
         params.append(year)
@@ -72,11 +81,14 @@ def get_transactions_filtered(month, year, categorie):
     cursor.execute(query, tuple(params))
 
     data = cursor.fetchall()
+
+    cursor.close()
     conn.close()
+
     return data
 
 
-def get_totaux(month, year, categorie):
+def get_totaux(user_id, month, year, categorie):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -85,9 +97,10 @@ def get_totaux(month, year, categorie):
             SUM(CASE WHEN type='revenu' THEN montant ELSE 0 END),
             SUM(CASE WHEN type='depense' THEN montant ELSE 0 END)
         FROM transactions
-        WHERE 1=1
+        WHERE user_id = %s
     """
-    params = []
+
+    params = [user_id]
 
     if month != "Tous":
         query += " AND MONTH(date) = %s"
@@ -104,5 +117,31 @@ def get_totaux(month, year, categorie):
     cursor.execute(query, tuple(params))
 
     result = cursor.fetchone()
+
+    cursor.close()
     conn.close()
+
     return result
+
+
+def check_user(username, password):
+    connection = get_connection()
+
+    cursor = connection.cursor()
+
+    query = """
+    SELECT * FROM users
+    WHERE username = %s AND password = %s
+    """
+
+    cursor.execute(query, (username, password))
+
+    user = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    return {
+        "id": user[0],
+        "username": user[1]
+    } if user else None
