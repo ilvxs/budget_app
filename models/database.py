@@ -206,3 +206,200 @@ def get_expenses_by_category(user_id):
     conn.close()
 
     return data
+
+
+def get_monthly_expenses(user_id):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT MONTH(date), SUM(montant)
+    FROM transactions
+    WHERE user_id = %s
+    AND type = 'depense'
+    GROUP BY MONTH(date)
+    ORDER BY MONTH(date)
+    """, (user_id,))
+
+    data = cursor.fetchall()
+
+    conn.close()
+
+    return data
+
+
+def get_biggest_expense_category(user_id):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT categorie, SUM(montant) as total
+        FROM transactions
+        WHERE user_id = %s
+        AND type = 'depense'
+        AND MONTH(date) = MONTH(CURRENT_DATE())
+        AND YEAR(date) = YEAR(CURRENT_DATE())
+        GROUP BY categorie
+        ORDER BY total DESC
+        LIMIT 1
+        """, (user_id,))
+
+    result = cursor.fetchone()
+
+    conn.close()
+
+    return result
+
+
+def get_average_monthly_expense(user_id):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT AVG(month_total)
+    FROM (
+        SELECT SUM(montant) as month_total
+        FROM transactions
+        WHERE user_id = %s
+        AND type = 'depense'
+        GROUP BY MONTH(date)
+    ) as monthly_expenses
+    """, (user_id,))
+
+    result = cursor.fetchone()[0]
+
+    conn.close()
+
+    return result or 0
+
+
+def get_current_month_expenses(user_id):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT SUM(montant)
+        FROM transactions
+        WHERE user_id = %s
+        AND type = 'depense'
+        AND MONTH(date) = MONTH(CURRENT_DATE())
+        AND YEAR(date) = YEAR(CURRENT_DATE())
+        """, (user_id,))
+
+    result = cursor.fetchone()[0]
+
+    conn.close()
+
+    return result or 0
+
+
+def get_previous_month_expenses(user_id):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT SUM(montant)
+    FROM transactions
+    WHERE user_id = %s
+    AND type = 'depense'
+    AND MONTH(date) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)
+    """, (user_id,))
+
+    result = cursor.fetchone()[0]
+
+    conn.close()
+
+    return result or 0
+
+
+def get_total_expenses(user_id):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT SUM(montant)
+    FROM transactions
+    WHERE user_id = %s
+    AND type = 'depense'
+    """, (user_id,))
+
+    total = cursor.fetchone()[0]
+
+    conn.close()
+
+    return total or 0
+
+
+def get_total_revenues(user_id):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT SUM(montant)
+    FROM transactions
+    WHERE user_id = %s
+    AND type = 'revenu'
+    """, (user_id,))
+
+    total = cursor.fetchone()[0]
+
+    conn.close()
+
+    return total or 0
+
+
+def get_high_expenses(user_id):
+
+    connect = get_connection()
+    cursor = connect.cursor()
+
+    cursor.execute("""
+    SELECT categorie, montant, date
+    FROM transactions
+    WHERE user_id = %s
+    AND type = 'depense'
+    ORDER BY montant DESC
+    LIMIT 5
+    """, (user_id,))
+
+    data = cursor.fetchall()
+
+    connect.close()
+
+    return data
+
+
+def get_current_month_revenues(user_id):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT SUM(montant)
+    FROM transactions
+    WHERE user_id = %s
+    AND type = 'revenu'
+    AND MONTH(date) = MONTH(CURRENT_DATE())
+    AND YEAR(date) = YEAR(CURRENT_DATE())
+    """, (user_id,))
+
+    total = cursor.fetchone()[0]
+
+    conn.close()
+
+    return total or 0

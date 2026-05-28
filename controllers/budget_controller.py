@@ -5,10 +5,12 @@ from PySide6.QtWidgets import QMessageBox
 
 
 class BudgetController:
-    def __init__(self, view, user, main_window):
+    def __init__(self, view, user, main_window, dashboard_controller, analytics_controller):
         self.view = view
         self.user = user
         self.main_window = main_window
+        self.dashboard_controller = dashboard_controller
+        self.analytics_controller = analytics_controller
 
         # connecter les boutons
         self.view.add_button.clicked.connect(self.ajouter_transaction)
@@ -66,8 +68,10 @@ class BudgetController:
         self.view.clear_inputs()
         self.view.show_message("Transaction ajoutée ✅")
         self.charger_transactions()
+        self.dashboard_controller.load_dashboard()
+        self.analytics_controller.load_analytics()
 
-        self.main_window.dashboard_controller.load_dashboard()
+        self.dashboard_controller.load_dashboard()
 
     def charger_transactions(self):
         # Au lieu de charger TOUTES les données, on lance directement le filtre.
@@ -97,8 +101,10 @@ class BudgetController:
             database.delete_transaction(id_)
 
             self.charger_transactions()
+            self.dashboard_controller.load_dashboard()
+            self.analytics_controller.load_analytics()
 
-            self.main_window.dashboard_controller.load_dashboard()
+            self.dashboard_controller.load_dashboard()
 
             self.view.show_message("Transaction supprimée ✅")
 

@@ -2,6 +2,7 @@ from models import database
 from views.main_window import MainWindow
 from controllers.budget_controller import BudgetController
 from controllers.dashboard_controller import DashboardController
+from controllers.analytics_controller import AnalyticsController
 
 
 class LoginController:
@@ -32,18 +33,26 @@ class LoginController:
             # open main app
             self.main_window = MainWindow()
 
-            # connect controller
-            self.controller = BudgetController(
-                self.main_window.transactions_page,
-                user,
-                self.main_window
-            )
-
-            self.main_window.dashboard_controller = DashboardController(
+            self.dashboard_controller = DashboardController(
                 self.main_window.dashboard_page,
                 user
             )
 
+            self.analytics_controller = AnalyticsController(
+                self.main_window.analytics_page,
+                user
+            )
+
+            # connect controller
+            self.controller = BudgetController(
+                self.main_window.transactions_page,
+                user,
+                self.main_window,
+                self.dashboard_controller,
+                self.analytics_controller
+            )
+
+            # show app
             self.main_window.show()
 
             # close login window

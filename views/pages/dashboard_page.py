@@ -59,7 +59,11 @@ class DashboardPage(QWidget):
         # CARDS LAYOUT
         # =========================
 
-        cards_layout = QHBoxLayout()
+        from PySide6.QtWidgets import QGridLayout
+        cards_layout = QGridLayout()
+        cards_layout.setHorizontalSpacing(20)
+        cards_layout.setVerticalSpacing(20)
+
         cards_layout.setSpacing(20)
 
         self.main_layout.addLayout(cards_layout)
@@ -92,10 +96,10 @@ class DashboardPage(QWidget):
             "#a855f7"
         )
 
-        cards_layout.addWidget(self.revenus_card)
-        cards_layout.addWidget(self.depenses_card)
-        cards_layout.addWidget(self.solde_card)
-        cards_layout.addWidget(self.transactions_card)
+        cards_layout.addWidget(self.revenus_card, 0, 0)
+        cards_layout.addWidget(self.depenses_card, 0, 1)
+        cards_layout.addWidget(self.solde_card, 1, 0)
+        cards_layout.addWidget(self.transactions_card, 1, 1)
 
         # =========================
         # CHARTS LAYOUT
