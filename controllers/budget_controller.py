@@ -67,10 +67,14 @@ class BudgetController:
         self.view.show_message("Transaction ajoutée ✅")
         self.charger_transactions()
 
+        self.main_window.dashboard_controller.load_dashboard()
+
     def charger_transactions(self):
         # Au lieu de charger TOUTES les données, on lance directement le filtre.
         # Ainsi, le tableau et les totaux seront parfaitement synchronisés avec les menus déroulants.
         self.filtrer_transactions()
+        # REFRESH DASHBOARD AUTOMATICALLY
+        self.update_dashboard()
 
     def supprimer_transaction(self):
         selected = self.view.table.currentRow()
@@ -93,6 +97,8 @@ class BudgetController:
             database.delete_transaction(id_)
 
             self.charger_transactions()
+
+            self.main_window.dashboard_controller.load_dashboard()
 
             self.view.show_message("Transaction supprimée ✅")
 
@@ -183,3 +189,14 @@ class BudgetController:
 
             # close dashboard
             self.main_window.close()
+
+    def update_dashboard(self):
+        revenus, depenses, transactions = database.get_dashboard_data(
+            self.user["id"]
+        )
+
+        self.main_window.dashboard_page.update_cards(
+            revenus,
+            depenses,
+            transactions
+        )

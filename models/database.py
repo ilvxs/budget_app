@@ -145,3 +145,64 @@ def check_user(username, password):
         "id": user[0],
         "username": user[1]
     } if user else None
+
+
+def get_dashboard_data(user_id):
+
+    connection = get_connection()
+
+    cursor = connection.cursor()
+
+    # revenus
+    cursor.execute("""
+        SELECT SUM(montant)
+        FROM transactions
+        WHERE type='revenu'
+        AND user_id=%s
+    """, (user_id,))
+
+    revenus = cursor.fetchone()[0] or 0
+
+    # dépenses
+    cursor.execute("""
+        SELECT SUM(montant)
+        FROM transactions
+        WHERE type='depense'
+        AND user_id=%s
+    """, (user_id,))
+
+    depenses = cursor.fetchone()[0] or 0
+
+    # total transactions
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM transactions
+        WHERE user_id=%s
+    """, (user_id,))
+
+    transactions = cursor.fetchone()[0]
+
+    connection.close()
+
+    return revenus, depenses, transactions
+
+
+def get_expenses_by_category(user_id):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT categorie, SUM(montant)
+        FROM transactions
+        WHERE type='depense'
+        AND user_id=%s
+        GROUP BY categorie
+        """, (user_id,))
+
+    data = cursor.fetchall()
+
+    conn.close()
+
+    return data

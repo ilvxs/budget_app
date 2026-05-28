@@ -1,6 +1,7 @@
 from models import database
 from views.main_window import MainWindow
 from controllers.budget_controller import BudgetController
+from controllers.dashboard_controller import DashboardController
 
 
 class LoginController:
@@ -36,6 +37,11 @@ class LoginController:
                 self.main_window.transactions_page,
                 user,
                 self.main_window
+            )
+
+            self.main_window.dashboard_controller = DashboardController(
+                self.main_window.dashboard_page,
+                user
             )
 
             self.main_window.show()
