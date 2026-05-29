@@ -15,7 +15,7 @@ from PySide6.QtGui import QIcon
 from views.pages.transactions_page import TransactionsPage
 from views.pages.dashboard_page import DashboardPage
 from views.pages.analytics_page import AnalyticsPage
-from views.pages.ai_assistant_page import AIAssistantPage
+from views.pages.ai_assistant_page import AssistantPage
 from views.pages.settings_page import SettingsPage
 
 
@@ -103,14 +103,14 @@ class MainWindow(QWidget):
         self.dashboard_button = QPushButton("🏠 Dashboard")
         self.transactions_button = QPushButton("💳 Transactions")
         self.analytics_button = QPushButton("📊 Analytics")
-        self.ai_button = QPushButton("🤖 AI Assistant")
+        self.assistant_button = QPushButton("🤖 AI Assistant")
         self.settings_button = QPushButton("⚙️ Settings")
 
         self.sidebar_buttons = [
             self.dashboard_button,
             self.transactions_button,
             self.analytics_button,
-            self.ai_button,
+            self.assistant_button,
             self.settings_button
         ]
 
@@ -144,14 +144,14 @@ class MainWindow(QWidget):
         self.dashboard_page = DashboardPage()
         self.transactions_page = TransactionsPage()
         self.analytics_page = AnalyticsPage()
-        self.ai_page = AIAssistantPage()
+        self.assistant_page = AssistantPage()
         self.settings_page = SettingsPage()
 
         # add pages
         self.pages.addWidget(self.dashboard_page)
         self.pages.addWidget(self.transactions_page)
         self.pages.addWidget(self.analytics_page)
-        self.pages.addWidget(self.ai_page)
+        self.pages.addWidget(self.assistant_page)
         self.pages.addWidget(self.settings_page)
 
         # =========================
@@ -183,9 +183,9 @@ class MainWindow(QWidget):
             )
         )
 
-        self.ai_button.clicked.connect(
+        self.assistant_button.clicked.connect(
             lambda: self.pages.setCurrentWidget(
-                self.ai_page
+                self.assistant_page
             )
         )
 

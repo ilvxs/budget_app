@@ -3,6 +3,7 @@ from views.main_window import MainWindow
 from controllers.budget_controller import BudgetController
 from controllers.dashboard_controller import DashboardController
 from controllers.analytics_controller import AnalyticsController
+from controllers.ai_assistant_controller import AssistantController
 
 
 class LoginController:
@@ -41,6 +42,14 @@ class LoginController:
             self.analytics_controller = AnalyticsController(
                 self.main_window.analytics_page,
                 user
+            )
+
+            # AI assistant controller
+            self.main_window.assistant_controller = (
+                AssistantController(
+                    self.main_window.assistant_page,
+                    user
+                )
             )
 
             # connect controller
