@@ -16,7 +16,8 @@ from PySide6.QtCharts import (
     QChart,
     QChartView,
     QLineSeries,
-    QValueAxis
+    QValueAxis,
+    QCategoryAxis
 )
 
 from PySide6.QtCore import Qt
@@ -242,7 +243,7 @@ class AnalyticsPage(QWidget):
     # UPDATE CHART
     # ==================================
 
-    def update_chart(self, values):
+    def update_chart(self, months, values):
 
         self.chart.removeAllSeries()
 
@@ -256,11 +257,21 @@ class AnalyticsPage(QWidget):
 
         self.chart.addSeries(series)
 
-        axis_x = QValueAxis()
-        axis_y = QValueAxis()
-
+        axis_x = QCategoryAxis()
         axis_x.setTitleText("Month")
+
+        for i, month in enumerate(months):
+            axis_x.append(month, i)
+
+        axis_x.setRange(0, max(len(months) - 1, 1))
+
+        axis_y = QValueAxis()
         axis_y.setTitleText("Expenses")
+
+        if values:
+            axis_y.setRange(0, max(values) + 500)
+        else:
+            axis_y.setRange(0, 100)
 
         self.chart.addAxis(axis_x, Qt.AlignBottom)
         self.chart.addAxis(axis_y, Qt.AlignLeft)

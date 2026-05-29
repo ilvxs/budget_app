@@ -20,12 +20,34 @@ class AnalyticsController:
             self.user["id"]
         )
 
+        months = []
         values = []
 
-        for row in data:
-            values.append(float(row[1]))
+        month_names = {
+            1: "Jan",
+            2: "Feb",
+            3: "Mar",
+            4: "Apr",
+            5: "May",
+            6: "Jun",
+            7: "Jul",
+            8: "Aug",
+            9: "Sep",
+            10: "Oct",
+            11: "Nov",
+            12: "Dec"
+        }
 
-        self.view.update_chart(values)
+        for year, month, total in data:
+            months.append(
+                f"{month_names[int(month)]} {year}"
+            )
+
+            values.append(
+                float(total)
+            )
+
+        self.view.update_chart(months, values)
 
         # =========================
         # INSIGHTS

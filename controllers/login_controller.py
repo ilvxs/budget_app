@@ -34,6 +34,10 @@ class LoginController:
             # open main app
             self.main_window = MainWindow()
 
+            self.main_window.settings_page.set_user(
+                user["username"]
+            )
+
             self.dashboard_controller = DashboardController(
                 self.main_window.dashboard_page,
                 user

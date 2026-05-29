@@ -211,16 +211,18 @@ def get_expenses_by_category(user_id):
 def get_monthly_expenses(user_id):
 
     conn = get_connection()
-
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT MONTH(date), SUM(montant)
+    SELECT 
+        YEAR(date),
+        MONTH(date),
+        SUM(montant)
     FROM transactions
     WHERE user_id = %s
     AND type = 'depense'
-    GROUP BY MONTH(date)
-    ORDER BY MONTH(date)
+    GROUP BY YEAR(date), MONTH(date)
+    ORDER BY YEAR(date), MONTH(date)
     """, (user_id,))
 
     data = cursor.fetchall()

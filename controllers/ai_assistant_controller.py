@@ -1,5 +1,8 @@
-from services.openai_service import ask_ai
+from services.gemini_service import ask_ai
 from models import database
+
+import html
+import re
 
 
 class AssistantController:
@@ -62,27 +65,55 @@ class AssistantController:
             {categories}
 
             Recent transactions:
-            {transactions[-15:]}
+            {transactions[-8:]}
         """
 
         return context
 
     def send_message(self):
 
-        question = self.view.input.text()
+        question = self.view.input.text().strip()
 
         if not question:
             return
 
         self.view.chat_box.append(
-            f"<b>You:</b> {question}"
+            f"""
+            <div style="
+                background-color:#dbeafe;
+                color:#1e3a8a;
+                padding:10px;
+                border-radius:10px;
+                margin-bottom:8px;
+            ">
+                <b>You:</b> {html.escape(question)}
+            </div>
+            """
         )
 
-        financial_context = (
-            self.build_financial_context()
-        )
+        financial_context = self.build_financial_context()
 
         full_prompt = f"""
+            You are an AI financial assistant inside a personal budget management app.
+
+            You must only answer questions related to:
+            - personal finance
+            - expenses
+            - revenues
+            - budget management
+            - savings
+            - spending analysis
+            - anomalies
+            - financial recommendations
+
+            If the user asks something unrelated, politely say:
+            "I'm designed to help only with your budget and financial data."
+
+            Use ONLY the financial data below.
+            Do not invent transactions or numbers.
+            Give practical advice.
+            Keep the answer clear and professional.
+
             {financial_context}
 
             USER QUESTION:
@@ -90,17 +121,63 @@ class AssistantController:
         """
 
         try:
-
             response = ask_ai(full_prompt)
 
+            formatted_response = self.format_ai_response(response)
+
             self.view.chat_box.append(
-                f"<b>AI:</b> {response}"
+                f"""
+                    <div style="
+                        background-color:#f8fafc;
+                        color:#0f172a;
+                        padding:12px;
+                        border-radius:10px;
+                        margin-bottom:12px;
+                        line-height:1.5;
+                    ">
+                        <b>AI:</b><br>{formatted_response}
+                    </div>
+                """
             )
 
         except Exception as e:
+            error_text = str(e)
 
-            self.view.chat_box.append(
-                f"<b>ERROR:</b> {str(e)}"
-            )
+            if "429" in error_text or "RESOURCE_EXHAUSTED" in error_text:
+                self.view.chat_box.append(
+                    """
+                    <div style="color:#dc2626;">
+                        <b>AI:</b> Gemini quota is temporarily unavailable. Please try again later.
+                    </div>
+                    """
+                )
+            elif "API key" in error_text or "401" in error_text:
+                self.view.chat_box.append(
+                    """
+                    <div style="color:#dc2626;">
+                        <b>AI:</b> API key problem. Check your Gemini API key.
+                    </div>
+                    """
+                )
+            else:
+                self.view.chat_box.append(
+                    f"""
+                    <div style="color:#dc2626;">
+                        <b>ERROR:</b> {html.escape(error_text)}
+                    </div>
+                    """
+                )
 
         self.view.input.clear()
+
+    def format_ai_response(self, text):
+        # Escape unsafe HTML first
+        text = html.escape(text)
+
+        # Convert markdown bold **text** to HTML bold
+        text = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", text)
+
+        # Convert line breaks
+        text = text.replace("\n", "<br>")
+
+        return text
