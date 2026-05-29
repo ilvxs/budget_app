@@ -268,51 +268,8 @@ def get_average_monthly_expense(user_id):
         FROM transactions
         WHERE user_id = %s
         AND type = 'depense'
-        GROUP BY MONTH(date)
+        GROUP BY YEAR(date), MONTH(date)
     ) as monthly_expenses
-    """, (user_id,))
-
-    result = cursor.fetchone()[0]
-
-    conn.close()
-
-    return result or 0
-
-
-def get_current_month_expenses(user_id):
-
-    conn = get_connection()
-
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT SUM(montant)
-        FROM transactions
-        WHERE user_id = %s
-        AND type = 'depense'
-        AND MONTH(date) = MONTH(CURRENT_DATE())
-        AND YEAR(date) = YEAR(CURRENT_DATE())
-        """, (user_id,))
-
-    result = cursor.fetchone()[0]
-
-    conn.close()
-
-    return result or 0
-
-
-def get_previous_month_expenses(user_id):
-
-    conn = get_connection()
-
-    cursor = conn.cursor()
-
-    cursor.execute("""
-    SELECT SUM(montant)
-    FROM transactions
-    WHERE user_id = %s
-    AND type = 'depense'
-    AND MONTH(date) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)
     """, (user_id,))
 
     result = cursor.fetchone()[0]
@@ -403,3 +360,97 @@ def get_current_month_revenues(user_id):
     conn.close()
 
     return total or 0
+
+
+def get_current_month_expenses(user_id):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT SUM(montant)
+        FROM transactions
+        WHERE user_id = %s
+        AND type = 'depense'
+        AND MONTH(date) = MONTH(CURRENT_DATE())
+        AND YEAR(date) = YEAR(CURRENT_DATE())
+        """, (user_id,))
+
+    result = cursor.fetchone()[0]
+
+    conn.close()
+
+    return result or 0
+
+
+def get_previous_month_expenses(user_id):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT SUM(montant)
+    FROM transactions
+    WHERE user_id = %s
+    AND type = 'depense'
+    AND MONTH(date) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)
+    AND YEAR(date) = YEAR(CURDATE() - INTERVAL 1 MONTH)
+    """, (user_id,))
+
+    result = cursor.fetchone()[0]
+
+    conn.close()
+
+    return result or 0
+
+
+def get_category_average(user_id, category):
+
+    connect = get_connection()
+    cursor = connect.cursor()
+
+    cursor.execute("""
+    SELECT AVG(month_total)
+    FROM (
+        SELECT SUM(montant) as month_total
+        FROM transactions
+        WHERE user_id = %s
+        AND type = 'depense'
+        AND categorie = %s
+        AND NOT (
+            MONTH(date) = MONTH(CURDATE())
+            AND YEAR(date) = YEAR(CURDATE())
+        )
+        GROUP BY YEAR(date), MONTH(date)
+    ) as monthly_data
+    """, (user_id, category))
+
+    result = cursor.fetchone()[0]
+
+    connect.close()
+
+    return result or 0
+
+
+def get_current_month_categories(user_id):
+
+    connect = get_connection()
+    cursor = connect.cursor()
+
+    cursor.execute("""
+    SELECT categorie, SUM(montant)
+    FROM transactions
+    WHERE user_id = %s
+    AND type = 'depense'
+    AND MONTH(date) = MONTH(CURDATE())
+    AND YEAR(date) = YEAR(CURDATE())
+    GROUP BY categorie
+    """, (user_id,))
+
+    data = cursor.fetchall()
+
+    connect.close()
+
+    return data

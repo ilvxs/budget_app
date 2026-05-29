@@ -146,6 +146,13 @@ class AnalyticsPage(QWidget):
         # =========================
 
         self.anomaly_box = QTextEdit()
+        self.anomaly_box.setStyleSheet("""
+            background-color: white;
+            color: #1e293b;
+            border-radius: 18px;
+            padding: 15px;
+            font-size: 15px;
+        """)
 
         self.anomaly_box.setReadOnly(True)
 
@@ -172,6 +179,8 @@ class AnalyticsPage(QWidget):
             border-radius: 18px;
             padding: 15px;
             font-size: 15px;
+            color: #1e293b;
+            selection-background-color: #3b82f6;
         }
         """)
 
