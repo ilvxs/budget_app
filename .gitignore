@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+.env
+
+transactions.xlsx
+
+test_db.py
+test_models.py
+
+.vscode/
