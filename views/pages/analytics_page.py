@@ -28,9 +28,7 @@ class AnalyticsPage(QWidget):
     def __init__(self):
         super().__init__()
 
-        # =========================
         # MAIN LAYOUT
-        # =========================
 
         outer_layout = QVBoxLayout(self)
 
@@ -48,9 +46,7 @@ class AnalyticsPage(QWidget):
         self.main_layout.setContentsMargins(25, 25, 25, 25)
         self.main_layout.setSpacing(25)
 
-        # =========================
         # TITLE
-        # =========================
 
         title = QLabel("📊 Analytics")
 
@@ -62,9 +58,7 @@ class AnalyticsPage(QWidget):
 
         self.main_layout.addWidget(title)
 
-        # =========================
         # EVOLUTION CHART
-        # =========================
 
         self.chart = QChart()
 
@@ -82,11 +76,9 @@ class AnalyticsPage(QWidget):
 
         self.main_layout.addWidget(self.chart_view)
 
-        # =========================
         # AI INSIGHTS TITLE
-        # =========================
 
-        insights_title = QLabel("🧠 AI Insights")
+        insights_title = QLabel("AI Insights")
 
         insights_title.setStyleSheet("""
         font-size: 22px;
@@ -96,9 +88,7 @@ class AnalyticsPage(QWidget):
 
         self.main_layout.addWidget(insights_title)
 
-        # =========================
         # INSIGHTS GRID
-        # =========================
 
         self.insights_widget = QWidget()
 
@@ -128,11 +118,9 @@ class AnalyticsPage(QWidget):
         self.insights_layout.setColumnStretch(0, 1)
         self.insights_layout.setColumnStretch(1, 1)
 
-        # =========================
         # ANOMALY TITLE
-        # =========================
 
-        anomaly_title = QLabel("⚠️ Anomaly Detection")
+        anomaly_title = QLabel("Anomaly Detection")
 
         anomaly_title.setStyleSheet("""
         font-size: 22px;
@@ -142,9 +130,7 @@ class AnalyticsPage(QWidget):
 
         self.main_layout.addWidget(anomaly_title)
 
-        # =========================
         # ANOMALY BOX
-        # =========================
 
         self.anomaly_box = QTextEdit()
         self.anomaly_box.setStyleSheet("""
@@ -165,9 +151,7 @@ class AnalyticsPage(QWidget):
 
         self.main_layout.addWidget(self.anomaly_box)
 
-        # =========================
         # STYLE
-        # =========================
 
         self.setStyleSheet("""
         QWidget {
@@ -185,9 +169,7 @@ class AnalyticsPage(QWidget):
         }
         """)
 
-    # ==================================
     # CREATE CARD
-    # ==================================
 
     def create_card(self, text):
 
@@ -239,9 +221,7 @@ class AnalyticsPage(QWidget):
 
         return card
 
-    # ==================================
     # UPDATE CHART
-    # ==================================
 
     def update_chart(self, months, values):
 
@@ -279,9 +259,7 @@ class AnalyticsPage(QWidget):
         series.attachAxis(axis_x)
         series.attachAxis(axis_y)
 
-    # ==================================
     # UPDATE INSIGHTS
-    # ==================================
 
     def update_insights(self, insights):
 

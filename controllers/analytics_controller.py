@@ -12,9 +12,7 @@ class AnalyticsController:
 
     def load_analytics(self):
 
-        # =========================
         # CHART
-        # =========================
 
         data = database.get_monthly_expenses(
             self.user["id"]
@@ -49,9 +47,7 @@ class AnalyticsController:
 
         self.view.update_chart(months, values)
 
-        # =========================
         # INSIGHTS
-        # =========================
 
         insights = []
 
@@ -97,7 +93,7 @@ class AnalyticsController:
                 )
             else:
                 insights.append(
-                    f"✅ Expenses decreased by {abs(round(change, 1))}%"
+                    f"Expenses decreased by {abs(round(change, 1))}%"
                 )
 
         else:
@@ -128,13 +124,13 @@ class AnalyticsController:
 
         messages = []
 
-        for category, montant, date in high_expenses:
+        for category, amount, date in high_expenses:
 
-            if montant >= 2000:
+            if amount >= 2000:
 
                 messages.append(
                     f"⚠️ High expense detected: "
-                    f"{montant} MAD in {category} ({date})"
+                    f"{amount} MAD in {category} ({date})"
                 )
 
         self.view.anomaly_box.setText(

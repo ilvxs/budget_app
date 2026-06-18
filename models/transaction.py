@@ -1,8 +1,8 @@
 class Transaction:
-    def __init__(self, id, type, montant, categorie, description, date):
+    def __init__(self, id, type, amount, category, description, date):
         self.id = id
         self.type = type
-        self.montant = montant
-        self.categorie = categorie
+        self.amount = amount
+        self.category = category
         self.description = description
         self.date = date

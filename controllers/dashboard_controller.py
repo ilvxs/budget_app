@@ -12,20 +12,16 @@ class DashboardController:
 
     def load_dashboard(self):
 
-        # =========================
         # TOTALS
-        # =========================
 
-        revenus, depenses = database.get_totaux(
+        revenues, expenses = database.get_totals(
             self.user["id"],
-            "Tous",
-            "Tous",
-            "Toutes"
+            "All",
+            "All",
+            "All"
         )
 
-        # =========================
         # TRANSACTIONS COUNT
-        # =========================
 
         data = database.get_all_transactions(
             self.user["id"]
@@ -34,23 +30,19 @@ class DashboardController:
         transactions_count = len(data)
 
         self.view.update_cards(
-            revenus,
-            depenses,
+            revenues,
+            expenses,
             transactions_count
         )
 
-        # =========================
         # MONTHLY CHART
-        # =========================
 
         self.view.update_monthly_chart(
-            revenus or 0,
-            depenses or 0
+            revenues or 0,
+            expenses or 0
         )
 
-        # =========================
         # PIE CHART
-        # =========================
 
         categories = database.get_expenses_by_category(
             self.user["id"]

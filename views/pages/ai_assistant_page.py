@@ -21,7 +21,7 @@ class AssistantPage(QWidget):
         layout.setContentsMargins(25, 25, 25, 25)
         layout.setSpacing(15)
 
-        title = QLabel("🤖 AI Financial Assistant")
+        title = QLabel("AI Financial Assistant")
 
         title.setStyleSheet("""
         font-size: 28px;

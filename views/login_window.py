@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
+    QHBoxLayout,
     QLabel,
     QLineEdit,
     QPushButton
@@ -25,7 +26,7 @@ class LoginWindow(QWidget):
         self.setLayout(self.layout)
 
         # Title
-        title = QLabel("🔐 Connexion")
+        title = QLabel("🔐 Login")
         title.setAlignment(Qt.AlignCenter)
 
         title.setStyleSheet("""
@@ -38,13 +39,13 @@ class LoginWindow(QWidget):
 
         # Username
         self.username_input = QLineEdit()
-        self.username_input.setPlaceholderText("Nom d'utilisateur")
+        self.username_input.setPlaceholderText("Username")
 
         self.layout.addWidget(self.username_input)
 
         # Password
         self.password_input = QLineEdit()
-        self.password_input.setPlaceholderText("Mot de passe")
+        self.password_input.setPlaceholderText("Password")
 
         # Hide password
         self.password_input.setEchoMode(QLineEdit.Password)
@@ -52,9 +53,14 @@ class LoginWindow(QWidget):
         self.layout.addWidget(self.password_input)
 
         # Login button
-        self.login_button = QPushButton("🔓 Se connecter")
+        self.login_button = QPushButton("Sign in")
 
         self.layout.addWidget(self.login_button)
+
+        # Register button
+        self.register_button = QPushButton("Sign up")
+
+        self.layout.addWidget(self.register_button)
 
         # Message label
         self.message_label = QLabel("")
@@ -98,6 +104,7 @@ class LoginWindow(QWidget):
 
         # Cursor
         self.login_button.setCursor(Qt.PointingHandCursor)
+        self.register_button.setCursor(Qt.PointingHandCursor)
 
     def show_message(self, text, success=False):
         if success:

@@ -19,7 +19,12 @@ def get_all_transactions(user_id):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM transactions WHERE user_id = %s", (user_id,))
+    cursor.execute("""
+        SELECT id, type, amount, category, description, date
+        FROM transactions
+        WHERE user_id = %s
+        ORDER BY date DESC, id DESC
+    """, (user_id,))
     data = cursor.fetchall()
 
     cursor.close()
@@ -27,16 +32,16 @@ def get_all_transactions(user_id):
     return data
 
 
-def insert_transaction(type_, montant, categorie, description, date, user_id):
+def insert_transaction(type_, amount, category, description, date, user_id):
     conn = get_connection()
     cursor = conn.cursor()
 
     query = """
-    INSERT INTO transactions (type, montant, categorie, description, date, user_id)
+    INSERT INTO transactions (type, amount, category, description, date, user_id)
     VALUES (%s, %s, %s, %s, %s, %s)
     """
 
-    cursor.execute(query, (type_, montant, categorie,
+    cursor.execute(query, (type_, amount, category,
                    description, date, user_id))
     conn.commit()
 
@@ -53,30 +58,33 @@ def delete_transaction(id):
     conn.close()
 
 
-# Filtre par catégorie, mois et année
+# Filter by category, month, and year
 
-def get_transactions_filtered(user_id, month, year, categorie):
+def get_transactions_filtered(user_id, month, year, category):
     conn = get_connection()
     cursor = conn.cursor()
 
     query = """
-    SELECT * FROM transactions
+    SELECT id, type, amount, category, description, date
+    FROM transactions
     WHERE user_id = %s
     """
 
     params = [user_id]
 
-    if month != "Tous":
+    if month != "All":
         query += " AND MONTH(date) = %s"
         params.append(month)
 
-    if year != "Tous":
+    if year != "All":
         query += " AND YEAR(date) = %s"
         params.append(year)
 
-    if categorie != "Toutes":
-        query += " AND categorie = %s"
-        params.append(categorie)
+    if category != "All":
+        query += " AND category = %s"
+        params.append(category)
+
+    query += " ORDER BY date DESC, id DESC"
 
     cursor.execute(query, tuple(params))
 
@@ -88,31 +96,31 @@ def get_transactions_filtered(user_id, month, year, categorie):
     return data
 
 
-def get_totaux(user_id, month, year, categorie):
+def get_totals(user_id, month, year, category):
     conn = get_connection()
     cursor = conn.cursor()
 
     query = """
         SELECT 
-            SUM(CASE WHEN type='revenu' THEN montant ELSE 0 END),
-            SUM(CASE WHEN type='depense' THEN montant ELSE 0 END)
+            SUM(CASE WHEN type='revenue' THEN amount ELSE 0 END),
+            SUM(CASE WHEN type='expense' THEN amount ELSE 0 END)
         FROM transactions
         WHERE user_id = %s
     """
 
     params = [user_id]
 
-    if month != "Tous":
+    if month != "All":
         query += " AND MONTH(date) = %s"
         params.append(month)
 
-    if year != "Tous":
+    if year != "All":
         query += " AND YEAR(date) = %s"
         params.append(year)
 
-    if categorie != "Toutes":
-        query += " AND categorie = %s"
-        params.append(categorie)
+    if category != "All":
+        query += " AND category = %s"
+        params.append(category)
 
     cursor.execute(query, tuple(params))
 
@@ -147,31 +155,65 @@ def check_user(username, password):
     } if user else None
 
 
+def username_exists(username):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    query = """
+    SELECT id FROM users
+    WHERE username = %s
+    """
+
+    cursor.execute(query, (username,))
+    user = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    return user is not None
+
+
+def create_user(username, password):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    query = """
+    INSERT INTO users (username, password)
+    VALUES (%s, %s)
+    """
+
+    cursor.execute(query, (username, password))
+    connection.commit()
+
+    cursor.close()
+    connection.close()
+
+
 def get_dashboard_data(user_id):
 
     connection = get_connection()
 
     cursor = connection.cursor()
 
-    # revenus
+    # revenues
     cursor.execute("""
-        SELECT SUM(montant)
+        SELECT SUM(amount)
         FROM transactions
-        WHERE type='revenu'
+        WHERE type='revenue'
         AND user_id=%s
     """, (user_id,))
 
-    revenus = cursor.fetchone()[0] or 0
+    revenues = cursor.fetchone()[0] or 0
 
-    # dépenses
+    # expenses
     cursor.execute("""
-        SELECT SUM(montant)
+        SELECT SUM(amount)
         FROM transactions
-        WHERE type='depense'
+        WHERE type='expense'
         AND user_id=%s
     """, (user_id,))
 
-    depenses = cursor.fetchone()[0] or 0
+    expenses = cursor.fetchone()[0] or 0
 
     # total transactions
     cursor.execute("""
@@ -184,7 +226,7 @@ def get_dashboard_data(user_id):
 
     connection.close()
 
-    return revenus, depenses, transactions
+    return revenues, expenses, transactions
 
 
 def get_expenses_by_category(user_id):
@@ -194,11 +236,11 @@ def get_expenses_by_category(user_id):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT categorie, SUM(montant)
+        SELECT category, SUM(amount)
         FROM transactions
-        WHERE type='depense'
+        WHERE type='expense'
         AND user_id=%s
-        GROUP BY categorie
+        GROUP BY category
         """, (user_id,))
 
     data = cursor.fetchall()
@@ -217,10 +259,10 @@ def get_monthly_expenses(user_id):
     SELECT 
         YEAR(date),
         MONTH(date),
-        SUM(montant)
+        SUM(amount)
     FROM transactions
     WHERE user_id = %s
-    AND type = 'depense'
+    AND type = 'expense'
     GROUP BY YEAR(date), MONTH(date)
     ORDER BY YEAR(date), MONTH(date)
     """, (user_id,))
@@ -239,13 +281,13 @@ def get_biggest_expense_category(user_id):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT categorie, SUM(montant) as total
+        SELECT category, SUM(amount) as total
         FROM transactions
         WHERE user_id = %s
-        AND type = 'depense'
+        AND type = 'expense'
         AND MONTH(date) = MONTH(CURRENT_DATE())
         AND YEAR(date) = YEAR(CURRENT_DATE())
-        GROUP BY categorie
+        GROUP BY category
         ORDER BY total DESC
         LIMIT 1
         """, (user_id,))
@@ -266,10 +308,10 @@ def get_average_monthly_expense(user_id):
     cursor.execute("""
     SELECT AVG(month_total)
     FROM (
-        SELECT SUM(montant) as month_total
+        SELECT SUM(amount) as month_total
         FROM transactions
         WHERE user_id = %s
-        AND type = 'depense'
+        AND type = 'expense'
         GROUP BY YEAR(date), MONTH(date)
     ) as monthly_expenses
     """, (user_id,))
@@ -288,10 +330,10 @@ def get_total_expenses(user_id):
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT SUM(montant)
+    SELECT SUM(amount)
     FROM transactions
     WHERE user_id = %s
-    AND type = 'depense'
+    AND type = 'expense'
     """, (user_id,))
 
     total = cursor.fetchone()[0]
@@ -308,10 +350,10 @@ def get_total_revenues(user_id):
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT SUM(montant)
+    SELECT SUM(amount)
     FROM transactions
     WHERE user_id = %s
-    AND type = 'revenu'
+    AND type = 'revenue'
     """, (user_id,))
 
     total = cursor.fetchone()[0]
@@ -327,11 +369,11 @@ def get_high_expenses(user_id):
     cursor = connect.cursor()
 
     cursor.execute("""
-    SELECT categorie, montant, date
+    SELECT category, amount, date
     FROM transactions
     WHERE user_id = %s
-    AND type = 'depense'
-    ORDER BY montant DESC
+    AND type = 'expense'
+    ORDER BY amount DESC
     LIMIT 5
     """, (user_id,))
 
@@ -349,10 +391,10 @@ def get_current_month_revenues(user_id):
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT SUM(montant)
+    SELECT SUM(amount)
     FROM transactions
     WHERE user_id = %s
-    AND type = 'revenu'
+    AND type = 'revenue'
     AND MONTH(date) = MONTH(CURRENT_DATE())
     AND YEAR(date) = YEAR(CURRENT_DATE())
     """, (user_id,))
@@ -371,10 +413,10 @@ def get_current_month_expenses(user_id):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT SUM(montant)
+        SELECT SUM(amount)
         FROM transactions
         WHERE user_id = %s
-        AND type = 'depense'
+        AND type = 'expense'
         AND MONTH(date) = MONTH(CURRENT_DATE())
         AND YEAR(date) = YEAR(CURRENT_DATE())
         """, (user_id,))
@@ -393,10 +435,10 @@ def get_previous_month_expenses(user_id):
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT SUM(montant)
+    SELECT SUM(amount)
     FROM transactions
     WHERE user_id = %s
-    AND type = 'depense'
+    AND type = 'expense'
     AND MONTH(date) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)
     AND YEAR(date) = YEAR(CURDATE() - INTERVAL 1 MONTH)
     """, (user_id,))
@@ -416,11 +458,11 @@ def get_category_average(user_id, category):
     cursor.execute("""
     SELECT AVG(month_total)
     FROM (
-        SELECT SUM(montant) as month_total
+        SELECT SUM(amount) as month_total
         FROM transactions
         WHERE user_id = %s
-        AND type = 'depense'
-        AND categorie = %s
+        AND type = 'expense'
+        AND category = %s
         AND NOT (
             MONTH(date) = MONTH(CURDATE())
             AND YEAR(date) = YEAR(CURDATE())
@@ -442,13 +484,13 @@ def get_current_month_categories(user_id):
     cursor = connect.cursor()
 
     cursor.execute("""
-    SELECT categorie, SUM(montant)
+    SELECT category, SUM(amount)
     FROM transactions
     WHERE user_id = %s
-    AND type = 'depense'
+    AND type = 'expense'
     AND MONTH(date) = MONTH(CURDATE())
     AND YEAR(date) = YEAR(CURDATE())
-    GROUP BY categorie
+    GROUP BY category
     """, (user_id,))
 
     data = cursor.fetchall()

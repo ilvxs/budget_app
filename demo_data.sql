@@ -1,18 +1,68 @@
--- Demo data for Budget AI - VERSION 2
--- ONLY two demo users:
+-- ============================================================
+-- Budget AI - Fresh English Demo Data
+-- Full database setup + demo users + demo transactions
+--
+-- Demo accounts:
 --   admin / 1234
 --   test  / 1234
 --
--- This file inserts many transactions for each user across 5 months.
--- It does NOT create or use the ilvxs user.
+-- This file uses the ENGLISH version of the schema:
+--   amount   instead of montant
+--   category instead of categorie
+--   revenue  instead of revenu
+--   expense  instead of depense
+--
+-- WARNING:
+-- This script recreates the users and transactions tables.
+-- It will delete existing data in these two tables.
+-- ============================================================
+
+CREATE DATABASE IF NOT EXISTS budget_db
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_general_ci;
 
 USE budget_db;
 
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS transactions;
+DROP TABLE IF EXISTS users;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
 -- =========================
--- USERS
+-- USERS TABLE
 -- =========================
 
-INSERT IGNORE INTO users (username, password)
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+
+-- =========================
+-- TRANSACTIONS TABLE
+-- =========================
+
+CREATE TABLE transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    type ENUM('revenue', 'expense') NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    description VARCHAR(255),
+    date DATE NOT NULL,
+    user_id INT NOT NULL,
+    CONSTRAINT fk_transactions_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
+
+-- =========================
+-- DEMO USERS
+-- =========================
+
+INSERT INTO users (username, password)
 VALUES
 ('admin', '1234'),
 ('test', '1234');
@@ -20,125 +70,132 @@ VALUES
 SET @admin_id = (SELECT id FROM users WHERE username = 'admin');
 SET @test_id  = (SELECT id FROM users WHERE username = 'test');
 
--- Clean old demo transactions for these two users only
-DELETE FROM transactions
-WHERE user_id IN (@admin_id, @test_id);
 
--- =====================================================
+-- ============================================================
 -- ADMIN DEMO DATA
--- =====================================================
+-- ============================================================
 
--- 4 months ago
-INSERT INTO transactions (type, montant, categorie, description, date, user_id)
+-- February 2026
+INSERT INTO transactions (type, amount, category, description, date, user_id)
 VALUES
-('revenu', 5200, 'Salaire', 'Salaire mensuel', DATE_SUB(CURDATE(), INTERVAL 4 MONTH), @admin_id),
-('depense', 850, 'Food', 'Groceries and meals', DATE_SUB(CURDATE(), INTERVAL 4 MONTH), @admin_id),
-('depense', 300, 'Transport', 'Taxi and bus', DATE_SUB(CURDATE(), INTERVAL 4 MONTH), @admin_id),
-('depense', 1200, 'Logement', 'Rent contribution', DATE_SUB(CURDATE(), INTERVAL 4 MONTH), @admin_id),
-('depense', 250, 'Factures', 'Internet bill', DATE_SUB(CURDATE(), INTERVAL 4 MONTH), @admin_id),
-('depense', 400, 'Loisirs', 'Weekend activity', DATE_SUB(CURDATE(), INTERVAL 4 MONTH), @admin_id);
+('revenue', 5200, 'Salary', 'Monthly salary', '2026-02-01', @admin_id),
+('expense', 850, 'Food', 'Groceries and meals', '2026-02-05', @admin_id),
+('expense', 300, 'Transport', 'Taxi and bus', '2026-02-08', @admin_id),
+('expense', 1200, 'Housing', 'Rent contribution', '2026-02-10', @admin_id),
+('expense', 250, 'Bills', 'Internet bill', '2026-02-15', @admin_id),
+('expense', 400, 'Leisure', 'Weekend activity', '2026-02-21', @admin_id);
 
--- 3 months ago
-INSERT INTO transactions (type, montant, categorie, description, date, user_id)
+-- March 2026
+INSERT INTO transactions (type, amount, category, description, date, user_id)
 VALUES
-('revenu', 5200, 'Salaire', 'Salaire mensuel', DATE_SUB(CURDATE(), INTERVAL 3 MONTH), @admin_id),
-('revenu', 800, 'Freelance', 'Small freelance task', DATE_SUB(CURDATE(), INTERVAL 3 MONTH), @admin_id),
-('depense', 900, 'Food', 'Groceries', DATE_SUB(CURDATE(), INTERVAL 3 MONTH), @admin_id),
-('depense', 350, 'Transport', 'Fuel and taxi', DATE_SUB(CURDATE(), INTERVAL 3 MONTH), @admin_id),
-('depense', 1200, 'Logement', 'Rent contribution', DATE_SUB(CURDATE(), INTERVAL 3 MONTH), @admin_id),
-('depense', 300, 'Factures', 'Electricity and internet', DATE_SUB(CURDATE(), INTERVAL 3 MONTH), @admin_id),
-('depense', 500, 'Autre', 'Clothes', DATE_SUB(CURDATE(), INTERVAL 3 MONTH), @admin_id);
+('revenue', 5200, 'Salary', 'Monthly salary', '2026-03-01', @admin_id),
+('revenue', 800, 'Freelance', 'Small freelance task', '2026-03-07', @admin_id),
+('expense', 900, 'Food', 'Groceries', '2026-03-04', @admin_id),
+('expense', 350, 'Transport', 'Fuel and taxi', '2026-03-09', @admin_id),
+('expense', 1200, 'Housing', 'Rent contribution', '2026-03-10', @admin_id),
+('expense', 300, 'Bills', 'Electricity and internet', '2026-03-16', @admin_id),
+('expense', 500, 'Other', 'Clothes', '2026-03-23', @admin_id);
 
--- 2 months ago
-INSERT INTO transactions (type, montant, categorie, description, date, user_id)
+-- April 2026
+INSERT INTO transactions (type, amount, category, description, date, user_id)
 VALUES
-('revenu', 5200, 'Salaire', 'Salaire mensuel', DATE_SUB(CURDATE(), INTERVAL 2 MONTH), @admin_id),
-('depense', 950, 'Food', 'Groceries and snacks', DATE_SUB(CURDATE(), INTERVAL 2 MONTH), @admin_id),
-('depense', 400, 'Transport', 'Transport pass', DATE_SUB(CURDATE(), INTERVAL 2 MONTH), @admin_id),
-('depense', 1200, 'Logement', 'Rent contribution', DATE_SUB(CURDATE(), INTERVAL 2 MONTH), @admin_id),
-('depense', 320, 'Factures', 'Phone and internet', DATE_SUB(CURDATE(), INTERVAL 2 MONTH), @admin_id),
-('depense', 450, 'Loisirs', 'Cinema and coffee', DATE_SUB(CURDATE(), INTERVAL 2 MONTH), @admin_id);
+('revenue', 5200, 'Salary', 'Monthly salary', '2026-04-01', @admin_id),
+('expense', 950, 'Food', 'Groceries and snacks', '2026-04-05', @admin_id),
+('expense', 400, 'Transport', 'Transport pass', '2026-04-08', @admin_id),
+('expense', 1200, 'Housing', 'Rent contribution', '2026-04-10', @admin_id),
+('expense', 320, 'Bills', 'Phone and internet', '2026-04-17', @admin_id),
+('expense', 450, 'Leisure', 'Cinema and coffee', '2026-04-24', @admin_id);
 
--- Previous month
-INSERT INTO transactions (type, montant, categorie, description, date, user_id)
+-- May 2026
+INSERT INTO transactions (type, amount, category, description, date, user_id)
 VALUES
-('revenu', 5200, 'Salaire', 'Salaire mensuel', DATE_SUB(CURDATE(), INTERVAL 1 MONTH), @admin_id),
-('depense', 1000, 'Food', 'Groceries', DATE_SUB(CURDATE(), INTERVAL 1 MONTH), @admin_id),
-('depense', 450, 'Transport', 'Taxi and fuel', DATE_SUB(CURDATE(), INTERVAL 1 MONTH), @admin_id),
-('depense', 1200, 'Logement', 'Rent contribution', DATE_SUB(CURDATE(), INTERVAL 1 MONTH), @admin_id),
-('depense', 350, 'Factures', 'Bills', DATE_SUB(CURDATE(), INTERVAL 1 MONTH), @admin_id),
-('depense', 550, 'Loisirs', 'Restaurant and weekend', DATE_SUB(CURDATE(), INTERVAL 1 MONTH), @admin_id);
+('revenue', 5200, 'Salary', 'Monthly salary', '2026-05-01', @admin_id),
+('expense', 1000, 'Food', 'Groceries', '2026-05-04', @admin_id),
+('expense', 450, 'Transport', 'Taxi and fuel', '2026-05-09', @admin_id),
+('expense', 1200, 'Housing', 'Rent contribution', '2026-05-10', @admin_id),
+('expense', 350, 'Bills', 'Bills', '2026-05-16', @admin_id),
+('expense', 550, 'Leisure', 'Restaurant and weekend', '2026-05-24', @admin_id);
 
--- Current month
-INSERT INTO transactions (type, montant, categorie, description, date, user_id)
+-- June 2026 - current month demo
+-- Includes a spending increase and high expenses for Analytics tests
+INSERT INTO transactions (type, amount, category, description, date, user_id)
 VALUES
-('revenu', 5500, 'Salaire', 'Salaire mensuel', CURDATE(), @admin_id),
-('revenu', 1000, 'Freelance', 'Freelance web task', CURDATE(), @admin_id),
-('depense', 1800, 'Food', 'Large food purchase', CURDATE(), @admin_id),
-('depense', 700, 'Transport', 'Fuel and taxi increase', CURDATE(), @admin_id),
-('depense', 1200, 'Logement', 'Rent contribution', CURDATE(), @admin_id),
-('depense', 380, 'Factures', 'Electricity and internet', CURDATE(), @admin_id),
-('depense', 600, 'Loisirs', 'Weekend trip', CURDATE(), @admin_id),
-('depense', 250, 'Autre', 'Small purchase', CURDATE(), @admin_id);
+('revenue', 5500, 'Salary', 'Monthly salary', '2026-06-01', @admin_id),
+('revenue', 1000, 'Freelance', 'Freelance web task', '2026-06-06', @admin_id),
+('expense', 1800, 'Food', 'Large food purchase', '2026-06-03', @admin_id),
+('expense', 700, 'Transport', 'Fuel and taxi increase', '2026-06-05', @admin_id),
+('expense', 1200, 'Housing', 'Rent contribution', '2026-06-10', @admin_id),
+('expense', 380, 'Bills', 'Electricity and internet', '2026-06-12', @admin_id),
+('expense', 600, 'Leisure', 'Weekend trip', '2026-06-15', @admin_id),
+('expense', 250, 'Other', 'Small purchase', '2026-06-17', @admin_id),
+('expense', 2300, 'Other', 'Emergency laptop repair', '2026-06-18', @admin_id),
+('expense', 950, 'Food', 'Family dinner and groceries', '2026-06-20', @admin_id);
 
 
--- =====================================================
+-- ============================================================
 -- TEST USER DEMO DATA
--- =====================================================
+-- ============================================================
 
--- 4 months ago
-INSERT INTO transactions (type, montant, categorie, description, date, user_id)
+-- February 2026
+INSERT INTO transactions (type, amount, category, description, date, user_id)
 VALUES
-('revenu', 4000, 'Freelance', 'Client project', DATE_SUB(CURDATE(), INTERVAL 4 MONTH), @test_id),
-('depense', 600, 'Food', 'Groceries', DATE_SUB(CURDATE(), INTERVAL 4 MONTH), @test_id),
-('depense', 200, 'Transport', 'Bus', DATE_SUB(CURDATE(), INTERVAL 4 MONTH), @test_id),
-('depense', 900, 'Logement', 'Room rent', DATE_SUB(CURDATE(), INTERVAL 4 MONTH), @test_id),
-('depense', 180, 'Factures', 'Phone bill', DATE_SUB(CURDATE(), INTERVAL 4 MONTH), @test_id),
-('depense', 350, 'Loisirs', 'Gaming and coffee', DATE_SUB(CURDATE(), INTERVAL 4 MONTH), @test_id);
+('revenue', 4000, 'Freelance', 'Client project', '2026-02-02', @test_id),
+('expense', 600, 'Food', 'Groceries', '2026-02-05', @test_id),
+('expense', 200, 'Transport', 'Bus', '2026-02-08', @test_id),
+('expense', 900, 'Housing', 'Room rent', '2026-02-10', @test_id),
+('expense', 180, 'Bills', 'Phone bill', '2026-02-16', @test_id),
+('expense', 350, 'Leisure', 'Gaming and coffee', '2026-02-22', @test_id);
 
--- 3 months ago
-INSERT INTO transactions (type, montant, categorie, description, date, user_id)
+-- March 2026
+INSERT INTO transactions (type, amount, category, description, date, user_id)
 VALUES
-('revenu', 4200, 'Freelance', 'Mobile app task', DATE_SUB(CURDATE(), INTERVAL 3 MONTH), @test_id),
-('depense', 650, 'Food', 'Food and snacks', DATE_SUB(CURDATE(), INTERVAL 3 MONTH), @test_id),
-('depense', 250, 'Transport', 'Taxi', DATE_SUB(CURDATE(), INTERVAL 3 MONTH), @test_id),
-('depense', 900, 'Logement', 'Room rent', DATE_SUB(CURDATE(), INTERVAL 3 MONTH), @test_id),
-('depense', 220, 'Factures', 'Internet', DATE_SUB(CURDATE(), INTERVAL 3 MONTH), @test_id),
-('depense', 300, 'Autre', 'Accessories', DATE_SUB(CURDATE(), INTERVAL 3 MONTH), @test_id);
+('revenue', 4200, 'Freelance', 'Mobile app task', '2026-03-02', @test_id),
+('expense', 650, 'Food', 'Food and snacks', '2026-03-05', @test_id),
+('expense', 250, 'Transport', 'Taxi', '2026-03-09', @test_id),
+('expense', 900, 'Housing', 'Room rent', '2026-03-10', @test_id),
+('expense', 220, 'Bills', 'Internet', '2026-03-16', @test_id),
+('expense', 300, 'Other', 'Accessories', '2026-03-25', @test_id);
 
--- 2 months ago
-INSERT INTO transactions (type, montant, categorie, description, date, user_id)
+-- April 2026
+INSERT INTO transactions (type, amount, category, description, date, user_id)
 VALUES
-('revenu', 4300, 'Freelance', 'Design task', DATE_SUB(CURDATE(), INTERVAL 2 MONTH), @test_id),
-('depense', 700, 'Food', 'Groceries', DATE_SUB(CURDATE(), INTERVAL 2 MONTH), @test_id),
-('depense', 300, 'Transport', 'Fuel', DATE_SUB(CURDATE(), INTERVAL 2 MONTH), @test_id),
-('depense', 900, 'Logement', 'Room rent', DATE_SUB(CURDATE(), INTERVAL 2 MONTH), @test_id),
-('depense', 250, 'Factures', 'Bills', DATE_SUB(CURDATE(), INTERVAL 2 MONTH), @test_id),
-('depense', 450, 'Loisirs', 'Gym and movies', DATE_SUB(CURDATE(), INTERVAL 2 MONTH), @test_id);
+('revenue', 4300, 'Freelance', 'Design task', '2026-04-02', @test_id),
+('expense', 700, 'Food', 'Groceries', '2026-04-05', @test_id),
+('expense', 300, 'Transport', 'Fuel', '2026-04-08', @test_id),
+('expense', 900, 'Housing', 'Room rent', '2026-04-10', @test_id),
+('expense', 250, 'Bills', 'Bills', '2026-04-16', @test_id),
+('expense', 450, 'Leisure', 'Gym and movies', '2026-04-24', @test_id);
 
--- Previous month
-INSERT INTO transactions (type, montant, categorie, description, date, user_id)
+-- May 2026
+INSERT INTO transactions (type, amount, category, description, date, user_id)
 VALUES
-('revenu', 4500, 'Freelance', 'Backend development', DATE_SUB(CURDATE(), INTERVAL 1 MONTH), @test_id),
-('depense', 750, 'Food', 'Groceries and restaurant', DATE_SUB(CURDATE(), INTERVAL 1 MONTH), @test_id),
-('depense', 350, 'Transport', 'Taxi and bus', DATE_SUB(CURDATE(), INTERVAL 1 MONTH), @test_id),
-('depense', 900, 'Logement', 'Room rent', DATE_SUB(CURDATE(), INTERVAL 1 MONTH), @test_id),
-('depense', 260, 'Factures', 'Internet and phone', DATE_SUB(CURDATE(), INTERVAL 1 MONTH), @test_id),
-('depense', 500, 'Loisirs', 'Shopping and entertainment', DATE_SUB(CURDATE(), INTERVAL 1 MONTH), @test_id);
+('revenue', 4500, 'Freelance', 'Backend development', '2026-05-02', @test_id),
+('expense', 750, 'Food', 'Groceries and restaurant', '2026-05-05', @test_id),
+('expense', 350, 'Transport', 'Taxi and bus', '2026-05-08', @test_id),
+('expense', 900, 'Housing', 'Room rent', '2026-05-10', @test_id),
+('expense', 260, 'Bills', 'Internet and phone', '2026-05-16', @test_id),
+('expense', 500, 'Leisure', 'Shopping and entertainment', '2026-05-23', @test_id);
 
--- Current month
-INSERT INTO transactions (type, montant, categorie, description, date, user_id)
+-- June 2026 - current month demo
+-- Includes transport spike and one high expense for Analytics tests
+INSERT INTO transactions (type, amount, category, description, date, user_id)
 VALUES
-('revenu', 4700, 'Freelance', 'Full-stack project', CURDATE(), @test_id),
-('revenu', 700, 'Autre', 'Small bonus', CURDATE(), @test_id),
-('depense', 800, 'Food', 'Restaurants and groceries', CURDATE(), @test_id),
-('depense', 1200, 'Transport', 'Car repair and fuel', CURDATE(), @test_id),
-('depense', 900, 'Logement', 'Room rent', CURDATE(), @test_id),
-('depense', 280, 'Factures', 'Internet and phone', CURDATE(), @test_id),
-('depense', 550, 'Loisirs', 'Weekend activity', CURDATE(), @test_id),
-('depense', 320, 'Autre', 'Personal items', CURDATE(), @test_id);
+('revenue', 4700, 'Freelance', 'Full-stack project', '2026-06-02', @test_id),
+('revenue', 700, 'Other', 'Small bonus', '2026-06-07', @test_id),
+('expense', 800, 'Food', 'Restaurants and groceries', '2026-06-04', @test_id),
+('expense', 1200, 'Transport', 'Car repair and fuel', '2026-06-06', @test_id),
+('expense', 900, 'Housing', 'Room rent', '2026-06-10', @test_id),
+('expense', 280, 'Bills', 'Internet and phone', '2026-06-13', @test_id),
+('expense', 550, 'Leisure', 'Weekend activity', '2026-06-15', @test_id),
+('expense', 320, 'Other', 'Personal items', '2026-06-17', @test_id),
+('expense', 2100, 'Transport', 'Major car repair', '2026-06-18', @test_id),
+('expense', 620, 'Food', 'Groceries before exams', '2026-06-21', @test_id);
 
--- Quick verification
+
+-- ============================================================
+-- QUICK VERIFICATION
+-- ============================================================
+
 SELECT 'admin transaction count' AS info, COUNT(*) AS total
 FROM transactions
 WHERE user_id = @admin_id;
@@ -146,3 +203,7 @@ WHERE user_id = @admin_id;
 SELECT 'test transaction count' AS info, COUNT(*) AS total
 FROM transactions
 WHERE user_id = @test_id;
+
+SELECT 'June transactions count' AS info, COUNT(*) AS total
+FROM transactions
+WHERE MONTH(date) = 6 AND YEAR(date) = 2026;

@@ -12,82 +12,83 @@ class BudgetController:
         self.dashboard_controller = dashboard_controller
         self.analytics_controller = analytics_controller
 
-        # connecter les boutons
-        self.view.add_button.clicked.connect(self.ajouter_transaction)
-        self.view.delete_button.clicked.connect(self.supprimer_transaction)
-        self.view.filter_button.clicked.connect(self.filtrer_transactions)
+        # connect buttons
+        self.view.add_button.clicked.connect(self.add_transaction)
+        self.view.delete_button.clicked.connect(
+            self.delete_selected_transaction)
+        self.view.filter_button.clicked.connect(self.filter_transactions)
         self.view.chart_button.clicked.connect(self.show_chart)
         self.view.export_button.clicked.connect(self.export_excel)
         self.main_window.logout_button.clicked.connect(self.logout)
 
-        # charger données au démarrage
-        self.charger_transactions()
+        # load data at startup
+        self.load_transactions()
 
-    def mettre_a_jour_totaux(self):
-        # On récupère les textes directement
+    def update_totals(self):
+        # get selected values directly
         month = self.view.month_filter.currentText()
         year = self.view.year_filter.currentText()
-        categorie = self.view.category_filter.currentText()
+        category = self.view.category_filter.currentText()
 
-        revenus, depenses = database.get_totaux(
+        revenues, expenses = database.get_totals(
             self.user["id"],
             month,
             year,
-            categorie
+            category
         )
-        self.view.update_totaux(revenus, depenses)
+        self.view.update_totals(revenues, expenses)
 
-    def ajouter_transaction(self):
-        montant = self.view.montant_input.text()
+    def add_transaction(self):
+        amount = self.view.amount_input.text()
         type_ = self.view.type_input.currentText()
-        categorie = self.view.categorie_input.currentText()
+        category = self.view.category_input.currentText()
         description = self.view.description_input.text()
         date = self.view.date_input.date().toString("yyyy-MM-dd")
 
         # message + validation
-        if not montant:
-            self.view.show_message("Le montant est obligatoire")
+        if not amount:
+            self.view.show_message("Amount is required")
             return
 
         try:
-            montant = float(montant)
+            amount = float(amount)
         except:
-            self.view.show_message("Montant invalide")
+            self.view.show_message("Invalid amount")
             return
 
         database.insert_transaction(
             type_,
-            montant,
-            categorie,
+            amount,
+            category,
             description,
             date,
             self.user["id"]
         )
 
-        # vider les champs + message et recharger les données
+        # clear fields, show message, and reload data
         self.view.clear_inputs()
-        self.view.show_message("Transaction ajoutée ✅")
-        self.charger_transactions()
+        self.view.show_message("Transaction added ✅")
+        self.load_transactions()
         self.dashboard_controller.load_dashboard()
         self.analytics_controller.load_analytics()
 
         self.dashboard_controller.load_dashboard()
 
-    def charger_transactions(self):
-        # Au lieu de charger TOUTES les données, on lance directement le filtre.
-        # Ainsi, le tableau et les totaux seront parfaitement synchronisés avec les menus déroulants.
-        self.filtrer_transactions()
+    def load_transactions(self):
+        # Instead of loading all data, apply the current filter directly.
+        # This keeps the table and totals synchronized with the dropdown filters.
+        self.filter_transactions()
         # REFRESH DASHBOARD AUTOMATICALLY
         self.update_dashboard()
 
-    def supprimer_transaction(self):
+    def delete_selected_transaction(self):
         selected = self.view.table.currentRow()
 
         if selected == -1:
-            self.view.show_message("Sélectionnez une transaction")
+            self.view.show_message("Select a transaction")
             return
 
-        # colonne 1 = vrai ID
+        # column 1 = real ID
         id_item = self.view.table.item(selected, 1)
 
         if id_item is None:
@@ -100,59 +101,59 @@ class BudgetController:
         if confirmation == QMessageBox.Yes:
             database.delete_transaction(id_)
 
-            self.charger_transactions()
+            self.load_transactions()
             self.dashboard_controller.load_dashboard()
             self.analytics_controller.load_analytics()
 
             self.dashboard_controller.load_dashboard()
 
-            self.view.show_message("Transaction supprimée ✅")
+            self.view.show_message("Transaction deleted 🔴")
 
-    def filtrer_transactions(self):
+    def filter_transactions(self):
         month = self.view.month_filter.currentText()
         year = self.view.year_filter.currentText()
-        categorie = self.view.category_filter.currentText()
+        category = self.view.category_filter.currentText()
 
         data = database.get_transactions_filtered(
-            self.user["id"], month, year, categorie)
+            self.user["id"], month, year, category)
         self.view.update_table(data)
 
-        self.mettre_a_jour_totaux()
+        self.update_totals()
 
-    # afficher un graphique
+    # display a chart
     def show_chart(self):
         month = self.view.month_filter.currentText()
         year = self.view.year_filter.currentText()
-        categorie = self.view.category_filter.currentText()
+        category = self.view.category_filter.currentText()
 
-        revenus, depenses = database.get_totaux(
+        revenues, expenses = database.get_totals(
             self.user["id"],
             month,
             year,
-            categorie
+            category
         )
 
-        # Nettoyage des valeurs (remplacer None par 0)
-        revenus_propres = revenus or 0
-        depenses_propres = depenses or 0
+        # Clean values by replacing None with 0
+        clean_revenues = revenues or 0
+        clean_expenses = expenses or 0
 
-        # Vérification : si tout est à 0, on annule l'affichage
-        if revenus_propres == 0 and depenses_propres == 0:
+        # Validation: if both values are 0, cancel display
+        if clean_revenues == 0 and clean_expenses == 0:
             self.view.show_message(
-                "Aucune donnée à afficher pour cette période.")
+                "No data to display for this period.")
             return
 
-        labels = ['Revenus', 'Dépenses']
-        values = [revenus_propres, depenses_propres]
+        labels = ['Revenues', 'Expenses']
+        values = [clean_revenues, clean_expenses]
 
-        # Nettoyer l'ancienne figure pour éviter la superposition si on clique plusieurs fois
+        # Clear the previous figure to avoid overlapping charts
         plt.clf()
 
         plt.pie(values, labels=labels, autopct='%1.1f%%')
-        plt.title("Répartition Budget")
+        plt.title("Budget Breakdown")
         plt.show()
 
-    # exporter les données vers Excel
+    # export data to Excel
     def export_excel(self):
         data = database.get_all_transactions(
             self.user["id"]
@@ -161,20 +162,20 @@ class BudgetController:
         wb = Workbook()
         ws = wb.active
 
-        ws.append(["ID", "Type", "Montant", "Catégorie", "Description", "Date"])
+        ws.append(["ID", "Type", "Amount", "Category", "Description", "Date"])
 
         for row in data:
             ws.append(row)
 
         wb.save("transactions.xlsx")
 
-        self.view.show_message("Export Excel réussi ✅")
+        self.view.show_message("Excel export successful 💾")
 
     def logout(self):
         reply = QMessageBox.question(
             self.view,
             "Logout",
-            "Voulez-vous vous déconnecter ?",
+            "Do you really want to log out?",
             QMessageBox.Yes | QMessageBox.No
         )
 
@@ -197,12 +198,12 @@ class BudgetController:
             self.main_window.close()
 
     def update_dashboard(self):
-        revenus, depenses, transactions = database.get_dashboard_data(
+        revenues, expenses, transactions = database.get_dashboard_data(
             self.user["id"]
         )
 
         self.main_window.dashboard_page.update_cards(
-            revenus,
-            depenses,
+            revenues,
+            expenses,
             transactions
         )

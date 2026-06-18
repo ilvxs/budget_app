@@ -30,9 +30,7 @@ class DashboardPage(QWidget):
     def __init__(self):
         super().__init__()
 
-        # =========================
         # MAIN LAYOUT
-        # =========================
 
         self.main_layout = QVBoxLayout()
 
@@ -41,9 +39,7 @@ class DashboardPage(QWidget):
 
         self.setLayout(self.main_layout)
 
-        # =========================
         # TITLE
-        # =========================
 
         title = QLabel("📊 Dashboard")
 
@@ -55,9 +51,7 @@ class DashboardPage(QWidget):
 
         self.main_layout.addWidget(title)
 
-        # =========================
         # CARDS LAYOUT
-        # =========================
 
         from PySide6.QtWidgets import QGridLayout
         cards_layout = QGridLayout()
@@ -68,24 +62,22 @@ class DashboardPage(QWidget):
 
         self.main_layout.addLayout(cards_layout)
 
-        # =========================
         # CARDS
-        # =========================
 
-        self.revenus_card = self.create_card(
-            "💰 Revenus",
+        self.revenues_card = self.create_card(
+            "💰 Revenues",
             "0 MAD",
             "#22c55e"
         )
 
-        self.depenses_card = self.create_card(
-            "💸 Dépenses",
+        self.expenses_card = self.create_card(
+            "💸 Expenses",
             "0 MAD",
             "#ef4444"
         )
 
-        self.solde_card = self.create_card(
-            "📈 Solde",
+        self.balance_card = self.create_card(
+            "📈 Balance",
             "0 MAD",
             "#3b82f6"
         )
@@ -96,14 +88,12 @@ class DashboardPage(QWidget):
             "#a855f7"
         )
 
-        cards_layout.addWidget(self.revenus_card, 0, 0)
-        cards_layout.addWidget(self.depenses_card, 0, 1)
-        cards_layout.addWidget(self.solde_card, 1, 0)
+        cards_layout.addWidget(self.revenues_card, 0, 0)
+        cards_layout.addWidget(self.expenses_card, 0, 1)
+        cards_layout.addWidget(self.balance_card, 1, 0)
         cards_layout.addWidget(self.transactions_card, 1, 1)
 
-        # =========================
         # CHARTS LAYOUT
-        # =========================
 
         charts_layout = QHBoxLayout()
 
@@ -111,9 +101,7 @@ class DashboardPage(QWidget):
 
         self.main_layout.addLayout(charts_layout)
 
-        # =========================
         # MONTHLY CHART
-        # =========================
 
         self.monthly_chart = QChart()
         self.monthly_chart.setTitle("Monthly Overview")
@@ -124,9 +112,7 @@ class DashboardPage(QWidget):
 
         charts_layout.addWidget(self.monthly_chart_view)
 
-        # =========================
         # PIE CHART
-        # =========================
 
         self.pie_chart = QChart()
         self.pie_chart.setTitle("Expense Categories")
@@ -137,9 +123,7 @@ class DashboardPage(QWidget):
 
         charts_layout.addWidget(self.pie_chart_view)
 
-        # =========================
         # STYLE
-        # =========================
 
         self.setStyleSheet("""
         QWidget {
@@ -148,9 +132,7 @@ class DashboardPage(QWidget):
         }
         """)
 
-    # ==================================
     # CREATE CARD
-    # ==================================
 
     def create_card(self, title, value, color):
 
@@ -207,40 +189,40 @@ class DashboardPage(QWidget):
 
         return card
 
-    def update_cards(self, revenus, depenses, transactions):
+    def update_cards(self, revenues, expenses, transactions):
 
-        revenus = revenus or 0
-        depenses = depenses or 0
+        revenues = revenues or 0
+        expenses = expenses or 0
 
-        solde = revenus - depenses
+        balance = revenues - expenses
 
-        self.revenus_card.value_label.setText(f"{revenus} MAD")
+        self.revenues_card.value_label.setText(f"{revenues} MAD")
 
-        self.depenses_card.value_label.setText(f"{depenses} MAD")
+        self.expenses_card.value_label.setText(f"{expenses} MAD")
 
-        self.solde_card.value_label.setText(f"{solde} MAD")
+        self.balance_card.value_label.setText(f"{balance} MAD")
 
         self.transactions_card.value_label.setText(
             str(transactions)
         )
 
-    def update_monthly_chart(self, revenus, depenses):
+    def update_monthly_chart(self, revenues, expenses):
 
         self.monthly_chart.removeAllSeries()
 
         for axis in self.monthly_chart.axes():
             self.monthly_chart.removeAxis(axis)
 
-        revenues_set = QBarSet("Revenus")
-        depenses_set = QBarSet("Dépenses")
+        revenues_set = QBarSet("Revenues")
+        expenses_set = QBarSet("Expenses")
 
-        revenues_set.append(revenus)
-        depenses_set.append(depenses)
+        revenues_set.append(revenues)
+        expenses_set.append(expenses)
 
         series = QBarSeries()
 
         series.append(revenues_set)
-        series.append(depenses_set)
+        series.append(expenses_set)
 
         self.monthly_chart.addSeries(series)
 

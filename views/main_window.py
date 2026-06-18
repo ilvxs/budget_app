@@ -24,16 +24,12 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        # =========================
         # WINDOW
-        # =========================
 
         self.setWindowTitle("Budget AI")
         self.resize(1400, 850)
 
-        # =========================
         # MAIN LAYOUT
-        # =========================
 
         self.main_layout = QHBoxLayout()
 
@@ -42,9 +38,7 @@ class MainWindow(QWidget):
 
         self.setLayout(self.main_layout)
 
-        # =========================
         # SIDEBAR
-        # =========================
 
         self.sidebar = QFrame()
 
@@ -61,11 +55,9 @@ class MainWindow(QWidget):
 
         self.sidebar.setLayout(self.sidebar_layout)
 
-        # =========================
         # TITLE
-        # =========================
 
-        title = QLabel("💰 Budget AI")
+        title = QLabel("Budget AI")
 
         title.setStyleSheet("""
         color: white;
@@ -76,9 +68,7 @@ class MainWindow(QWidget):
 
         self.sidebar_layout.addWidget(title)
 
-        # =========================
         # SIDEBAR BUTTON STYLE
-        # =========================
 
         self.sidebar_button_style = """
         QPushButton {
@@ -96,15 +86,13 @@ class MainWindow(QWidget):
         }
         """
 
-        # =========================
         # BUTTONS
-        # =========================
 
-        self.dashboard_button = QPushButton("🏠 Dashboard")
-        self.transactions_button = QPushButton("💳 Transactions")
-        self.analytics_button = QPushButton("📊 Analytics")
-        self.assistant_button = QPushButton("🤖 AI Assistant")
-        self.settings_button = QPushButton("⚙️ Settings")
+        self.dashboard_button = QPushButton("Dashboard")
+        self.transactions_button = QPushButton("Transactions")
+        self.analytics_button = QPushButton("Analytics")
+        self.assistant_button = QPushButton("AI Assistant")
+        self.settings_button = QPushButton("Settings")
 
         self.sidebar_buttons = [
             self.dashboard_button,
@@ -122,11 +110,9 @@ class MainWindow(QWidget):
 
         self.sidebar_layout.addStretch()
 
-        # =========================
         # LOGOUT
-        # =========================
 
-        self.logout_button = QPushButton("🚪 Logout")
+        self.logout_button = QPushButton("Logout")
 
         self.logout_button.setStyleSheet(self.sidebar_button_style)
 
@@ -134,9 +120,7 @@ class MainWindow(QWidget):
 
         self.sidebar_layout.addWidget(self.logout_button)
 
-        # =========================
         # STACKED WIDGET
-        # =========================
 
         self.pages = QStackedWidget()
 
@@ -154,16 +138,12 @@ class MainWindow(QWidget):
         self.pages.addWidget(self.assistant_page)
         self.pages.addWidget(self.settings_page)
 
-        # =========================
         # ADD TO MAIN LAYOUT
-        # =========================
 
         self.main_layout.addWidget(self.sidebar)
         self.main_layout.addWidget(self.pages)
 
-        # =========================
         # NAVIGATION
-        # =========================
 
         self.dashboard_button.clicked.connect(
             lambda: self.pages.setCurrentWidget(

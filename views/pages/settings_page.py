@@ -64,7 +64,7 @@ class SettingsPage(QWidget):
         app_layout = QVBoxLayout()
         self.app_card.setLayout(app_layout)
 
-        app_title = QLabel("💰 Application Info")
+        app_title = QLabel("Application Info")
         app_title.setStyleSheet("""
         font-size: 20px;
         font-weight: bold;
@@ -95,7 +95,7 @@ class SettingsPage(QWidget):
         ai_layout = QVBoxLayout()
         self.ai_card.setLayout(ai_layout)
 
-        ai_title = QLabel("🤖 AI Assistant")
+        ai_title = QLabel("AI Assistant")
         ai_title.setStyleSheet("""
         font-size: 20px;
         font-weight: bold;
@@ -124,7 +124,7 @@ class SettingsPage(QWidget):
         future_layout = QVBoxLayout()
         self.future_card.setLayout(future_layout)
 
-        future_title = QLabel("🔧 Future Options")
+        future_title = QLabel("Future Options")
         future_title.setStyleSheet("""
         font-size: 20px;
         font-weight: bold;
@@ -136,9 +136,7 @@ class SettingsPage(QWidget):
             "- Password update\n"
             "- Notifications\n"
             "- Currency preference\n"
-            "- Register screen\n"
             "- More advanced prediction system\n"
-            "- Budget goals\n"
             "- Better AI memory and conversation history"
         )
 

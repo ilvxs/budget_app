@@ -12,6 +12,7 @@ class LoginController:
 
         # connect login button
         self.view.login_button.clicked.connect(self.login)
+        self.view.register_button.clicked.connect(self.register)
 
     def login(self):
         username = self.view.username_input.text()
@@ -19,7 +20,7 @@ class LoginController:
 
         # validation
         if not username or not password:
-            self.view.show_message("Remplissez tous les champs")
+            self.view.show_message("Please fill in all fields")
             return
 
         # check user
@@ -27,7 +28,7 @@ class LoginController:
 
         if user:
             self.view.show_message(
-                "Connexion réussie ✅",
+                "Login successful",
                 success=True
             )
 
@@ -73,5 +74,36 @@ class LoginController:
 
         else:
             self.view.show_message(
-                "Nom d'utilisateur ou mot de passe incorrect"
+                "Incorrect username or password"
             )
+
+    def register(self):
+        username = self.view.username_input.text().strip()
+        password = self.view.password_input.text().strip()
+
+        if not username or not password:
+            self.view.show_message("Please fill in all fields")
+            return
+
+        if len(username) < 3:
+            self.view.show_message(
+                "Username must contain at least 3 characters")
+            return
+
+        if len(password) < 4:
+            self.view.show_message(
+                "Password must contain at least 4 characters")
+            return
+
+        if database.username_exists(username):
+            self.view.show_message("This username already exists")
+            return
+
+        database.create_user(username, password)
+
+        self.view.show_message(
+            "Account created successfully. You can now sign in.",
+            success=True
+        )
+
+        self.view.password_input.clear()

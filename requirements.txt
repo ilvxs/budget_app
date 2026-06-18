@@ -1,0 +1,28 @@
+PySide6
+mysql-connector-python
+openpyxl
+matplotlib
+google-genai
+
+# ------------------------------------------------------------
+# Gemini API Key Setup
+# ------------------------------------------------------------
+# This project uses Google Gemini for the AI Assistant.
+# For security reasons, the API key is NOT written directly in the code.
+# Before running the application, each user must create their own Gemini API key
+# and store it as an environment variable named GEMINI_API_KEY.
+#
+# Windows PowerShell - temporary for current terminal session:
+# $env:GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
+# python main.py
+#
+# Windows PowerShell - permanent:
+# setx GEMINI_API_KEY "YOUR_GEMINI_API_KEY"
+#
+# After using setx, close VS Code / terminal and open it again.
+# Then run:
+# python main.py
+#
+# macOS / Linux:
+# export GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
+# python main.py
